@@ -22,12 +22,12 @@ public class HealthBar : MonoBehaviour
     
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.tag == "Ennemy")
+        if (collision.CompareTag("Ennemy"))
         {
+            Debug.Log("Damage with " + collision.name);
             TakeDamage(5);
-            //_rigidBody.AddForce(Vector3.left * 2f, ForceMode2D.Impulse);
+            _rigidBody.AddForce(Vector2.left * 2f, ForceMode2D.Impulse);
             _animator.SetTrigger("Hit");
-            StartCoroutine(Invulnerability());
         }
     }
     void Start()
@@ -60,6 +60,16 @@ public class HealthBar : MonoBehaviour
             TakeDamage(20);
         }
         
+        //Respawn
+        
+        if (_rigidBody.position.y <= -10)
+        {
+            _rigidBody.position = new Vector2(-128.2f,18.34f);
+            _rigidBody.linearVelocity = Vector2.zero;
+            TakeDamage(5);
+            transform.Translate(0 * Time.deltaTime * 0, 0, 0);
+        }
+        
         
     }
 
@@ -81,17 +91,18 @@ public class HealthBar : MonoBehaviour
     {
         SceneManager.LoadScene("GameOver");
     }
-
-    private IEnumerator Invulnerability()
+    
+    public IEnumerator KnockBack(float knockbackDuration, float knockbackPower, Transform obj)
     {
-        Physics2D.IgnoreLayerCollision(8, 7, true);
-        for (int i = 0; i < numberOffFlashes; i++)
+        float timer = 0;
+
+        while (knockbackDuration > timer)
         {
-            _spriteRenderer.color = new Color(1,0,0,0.5f);
-            yield return new WaitForSeconds(iFrameTime/(numberOffFlashes*2));
-            _spriteRenderer.color= new Color(1,1,1);
-            yield return new WaitForSeconds(iFrameTime/(numberOffFlashes*2));
+            timer += Time.deltaTime;
+            Vector2 direction = (obj.transform.position - this.transform.position).normalized;
+            _rigidBody.AddForce(-direction * knockbackPower);
         }
-        Physics2D.IgnoreLayerCollision(8, 7, false);
+
+        yield return 0;
     }
 }

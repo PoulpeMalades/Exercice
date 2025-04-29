@@ -25,11 +25,11 @@ public class PlayerAttack : MonoBehaviour
 
     private void Update()
     {
-        float horizontal = Input.GetAxis("Horizontal");
         bool isAttacking = Input.GetButton("Fire1");
+        bool roll = Input.GetKeyDown(KeyCode.Q);
         
         
-        if (isAttacking && attackTimerCounter >= timeBtwAttacks)
+        if (isAttacking && attackTimerCounter >= timeBtwAttacks && !roll)
         {
             attackTimerCounter = 0f;
             

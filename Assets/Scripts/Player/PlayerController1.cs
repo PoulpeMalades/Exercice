@@ -1,8 +1,11 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-
+using System.Collections;
+using System.Collections.Generic;
 public class PlayerController1 : MonoBehaviour
 {
+    public static PlayerController1 instance;
+    
     public float MoveSpeed;
     public float JumpForce;
     
@@ -24,8 +27,11 @@ public class PlayerController1 : MonoBehaviour
     private float _attackTimer;
     private float _attack2Timer;
     //private float Timer = 0f;
-    
 
+    private void Awake()
+    {
+        instance = this;
+    }
     
     void Start()
     {
@@ -61,10 +67,6 @@ public class PlayerController1 : MonoBehaviour
             _rigidBody.AddForce(Vector2.up * JumpForce);
             _animator.SetBool("Jump", true);
         }
-        if (_rigidBody.linearVelocity.y > 0)
-        {
-            //_animator.SetBool("Jump", true);
-        }
 
         if (_rigidBody.linearVelocity.y < 0)
         {
@@ -77,10 +79,13 @@ public class PlayerController1 : MonoBehaviour
         }
 
         
-
+        // roulade
         if (roll)
         {
             _animator.SetBool("roll", true);
+            
+            StartCoroutine(Invulnerability());
+            
         }
         else
         {
@@ -104,6 +109,26 @@ public class PlayerController1 : MonoBehaviour
             _animator.SetBool("Death", true);
         }
         
+    }
+    private IEnumerator Invulnerability()
+    {
+        Physics2D.IgnoreLayerCollision(8, 7, true);
+        yield return new WaitForSeconds(1f);
+        Physics2D.IgnoreLayerCollision(8,7 ,false);
+    }
+    
+    public IEnumerator KnockBack(float knockbackDuration, float knockbackPower, Transform obj)
+    {
+        float timer = 0;
+
+        while (knockbackDuration > timer)
+        {
+            timer += Time.deltaTime;
+            Vector2 direction = (obj.transform.position - this.transform.position).normalized;
+            _rigidBody.AddForce(-direction * knockbackPower);
+        }
+
+        yield return 0;
     }
     
 }
