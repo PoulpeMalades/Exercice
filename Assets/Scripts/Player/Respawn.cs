@@ -11,12 +11,11 @@ public class Respawn : MonoBehaviour
          {
              rb = GetComponent<Rigidbody2D>();
          }
-
-    private void Update()
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (rb.position.y <= -10)
+        if (collision.CompareTag("Respawn"))
         {
-            rb.position = new Vector2(-128.2f,18.34f);
+            rb.position = new Vector3 (-128.2f,18.34f);
             rb.linearVelocity = Vector2.zero;
         }
     }

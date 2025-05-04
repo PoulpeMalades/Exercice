@@ -17,17 +17,26 @@ public class HealthBar : MonoBehaviour
     [SerializeField]private float iFrameTime;
     [SerializeField]private int numberOffFlashes;
     private SpriteRenderer _spriteRenderer;
-        
+    
+    [SerializeField] private AudioClip audioHit = null;
+    private AudioSource _audioSource;
     
     
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.tag == "Ennemy")
+        if (collision.CompareTag("Ennemy"))
         {
+            Debug.Log("Damage with " + collision.name);
             TakeDamage(5);
-            //_rigidBody.AddForce(Vector3.left * 2f, ForceMode2D.Impulse);
+            _rigidBody.AddForce(Vector2.left * 2f, ForceMode2D.Impulse);
             _animator.SetTrigger("Hit");
-            StartCoroutine(Invulnerability());
+            _audioSource.PlayOneShot(audioHit);
+        }
+        if (collision.CompareTag("Respawn"))
+        {
+            _rigidBody.position = new Vector3 (-128.2f,18.34f);
+            _rigidBody.linearVelocity = Vector2.zero;
+            TakeDamage(5);
         }
     }
     void Start()
@@ -35,6 +44,7 @@ public class HealthBar : MonoBehaviour
         _rigidBody = GetComponent<Rigidbody2D>();
         _animator = GetComponent<Animator>();
         _spriteRenderer = GetComponent<SpriteRenderer>();
+        _audioSource = GetComponent<AudioSource>();
     }
 
     void Update()
@@ -59,8 +69,6 @@ public class HealthBar : MonoBehaviour
         {
             TakeDamage(20);
         }
-        
-        
     }
 
     public void TakeDamage(float damage)
@@ -81,17 +89,18 @@ public class HealthBar : MonoBehaviour
     {
         SceneManager.LoadScene("GameOver");
     }
-
-    private IEnumerator Invulnerability()
+    
+    public IEnumerator KnockBack(float knockbackDuration, float knockbackPower, Transform obj)
     {
-        Physics2D.IgnoreLayerCollision(8, 7, true);
-        for (int i = 0; i < numberOffFlashes; i++)
+        float timer = 0;
+
+        while (knockbackDuration > timer)
         {
-            _spriteRenderer.color = new Color(1,0,0,0.5f);
-            yield return new WaitForSeconds(iFrameTime/(numberOffFlashes*2));
-            _spriteRenderer.color= new Color(1,1,1);
-            yield return new WaitForSeconds(iFrameTime/(numberOffFlashes*2));
+            timer += Time.deltaTime;
+            Vector2 direction = (obj.transform.position - this.transform.position).normalized;
+            _rigidBody.AddForce(-direction * knockbackPower);
         }
-        Physics2D.IgnoreLayerCollision(8, 7, false);
+
+        yield return 0;
     }
 }
